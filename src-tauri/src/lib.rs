@@ -155,7 +155,7 @@ fn start_reply(app: AppHandle) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let translate_shortcut = Shortcut::new(Some(Modifiers::ALT), Code::KeyQ);
-    let reply_shortcut = Shortcut::new(Some(Modifiers::ALT), Code::Enter);
+    let reply_shortcut = Shortcut::new(Some(Modifiers::ALT), Code::KeyA);
 
     let shortcut_plugin = tauri_plugin_global_shortcut::Builder::new()
         .with_shortcuts([translate_shortcut, reply_shortcut])

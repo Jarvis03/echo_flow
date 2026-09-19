@@ -135,7 +135,7 @@ fn wait_for_hotkey_release(reply_shortcut: bool) {
     let deadline = Instant::now() + Duration::from_millis(500);
     while (Vk::Alt.is_down()
         || if reply_shortcut {
-            Vk::Enter.is_down()
+            Vk::A.is_down()
         } else {
             Vk::Q.is_down()
         })

@@ -131,7 +131,7 @@ export default function App() {
               <kbd>Alt</kbd><span>+</span><kbd>Q</kbd>
             </div>
             <h1>选择文字，立即捕获</h1>
-            <p>选中外语按 Alt + Q；在输入框写中文后按 Alt + Enter。</p>
+            <p>选中外语按 Alt + Q；在输入框写中文后按 Alt + A。</p>
           </div>
         )}
 
