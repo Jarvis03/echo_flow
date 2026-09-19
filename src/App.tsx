@@ -13,6 +13,8 @@ function getInitialState(): CaptureState {
       originalText: "Could you verify the GPS data before the release?",
       translatedText: "你能在发布前确认一下 GPS 数据吗？",
       provider: "Google Translate",
+      mode: "read",
+      injected: false,
     };
   }
   if (demo === "translating") {
@@ -20,6 +22,7 @@ function getInitialState(): CaptureState {
       status: "translating",
       originalText: "Could you verify the GPS data before the release?",
       provider: "Google Translate",
+      mode: "read",
     };
   }
   return { status: "idle" };
@@ -27,7 +30,7 @@ function getInitialState(): CaptureState {
 
 function toCaptureState(result: CaptureResult): CaptureState {
   if (result.success && result.text) {
-    return { status: "translating", originalText: result.text, provider: "Google Translate" };
+    return { status: "translating", originalText: result.text, provider: "Google Translate", mode: "read" };
   }
 
   return {
@@ -44,6 +47,8 @@ function toTranslationState(result: TranslationResult): CaptureState {
       originalText: result.originalText,
       translatedText: result.translatedText,
       provider: result.provider,
+      mode: result.mode,
+      injected: result.injected,
     };
   }
 
@@ -74,6 +79,7 @@ export default function App() {
           status: "translating",
           originalText: result.originalText,
           provider: result.provider,
+          mode: result.mode,
         });
       },
       (result) => setState(toTranslationState(result)),
@@ -125,7 +131,7 @@ export default function App() {
               <kbd>Alt</kbd><span>+</span><kbd>Q</kbd>
             </div>
             <h1>选择文字，立即捕获</h1>
-            <p>在任意应用中选中文字，然后按快捷键。</p>
+            <p>选中外语按 Alt + Q；在输入框写中文后按 Alt + Enter。</p>
           </div>
         )}
 
@@ -142,13 +148,13 @@ export default function App() {
         {state.status === "translating" && (
           <div className="translation-layout">
             <div className="section-label">
-              <span>原文</span>
+              <span>{state.mode === "reply" ? "中文回复" : "原文"}</span>
               <span className="source-pill">{state.provider}</span>
             </div>
             <div className="original-text">{state.originalText}</div>
             <div className="translating-row">
               <span className="spinner spinner-small" aria-hidden="true" />
-              <span>正在翻译为中文…</span>
+              <span>{state.mode === "reply" ? "正在翻译为英文并准备键入…" : "正在翻译为中文…"}</span>
             </div>
           </div>
         )}
@@ -156,12 +162,12 @@ export default function App() {
         {state.status === "success" && (
           <div className="translation-layout">
             <div className="section-label">
-              <span>原文</span>
+              <span>{state.mode === "reply" ? "中文回复" : "原文"}</span>
               <span className="source-pill">{state.provider}</span>
             </div>
             <div className="original-text">{state.originalText}</div>
             <div className="translation-divider" />
-            <div className="section-label"><span>中文翻译</span></div>
+            <div className="section-label"><span>{state.mode === "reply" ? "英文回复" : "中文翻译"}</span></div>
             <div className="translated-text" tabIndex={0}>{state.translatedText}</div>
           </div>
         )}
@@ -187,7 +193,11 @@ export default function App() {
         <span className="privacy-note">
           {state.status === "idle" || state.status === "loading"
             ? "剪贴板内容会自动恢复"
-            : "翻译文本发送至 Google Cloud"}
+            : state.status === "success" && state.mode === "reply" && state.injected
+              ? "已自动键入目标应用，请自行按 Enter 发送"
+              : state.status === "success" && state.mode === "reply"
+                ? "无法自动键入，请使用右侧复制按钮"
+              : "翻译文本发送至 Google Cloud"}
         </span>
         {state.status === "success" && (
           <button className="copy-button" onClick={() => void copyText()}>

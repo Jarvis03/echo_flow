@@ -35,13 +35,23 @@ impl TranslationProvider for GoogleTranslationProvider {
     }
 
     fn translate_read(&self, text: &str) -> Result<String, TranslationError> {
+        self.translate(text, "zh-CN")
+    }
+
+    fn translate_reply(&self, text: &str) -> Result<String, TranslationError> {
+        self.translate(text, "en")
+    }
+}
+
+impl GoogleTranslationProvider {
+    fn translate(&self, text: &str, target: &str) -> Result<String, TranslationError> {
         let response = self
             .client
             .post(GOOGLE_TRANSLATE_URL)
             .header("X-Goog-Api-Key", &self.api_key)
             .json(&TranslateRequest {
                 q: text,
-                target: "zh-CN",
+                target,
                 format: "text",
             })
             .send()
@@ -75,7 +85,7 @@ impl TranslationProvider for GoogleTranslationProvider {
 #[derive(Serialize)]
 struct TranslateRequest<'a> {
     q: &'a str,
-    target: &'static str,
+    target: &'a str,
     format: &'static str,
 }
 

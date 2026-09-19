@@ -38,6 +38,6 @@ impl CaptureResult {
 }
 
 #[cfg(not(target_os = "windows"))]
-pub use unsupported::capture_selected_text;
+pub use unsupported::{capture_focused_input, capture_selected_text};
 #[cfg(target_os = "windows")]
-pub use windows::capture_selected_text;
+pub use windows::{capture_focused_input, capture_selected_text};

@@ -70,10 +70,21 @@ impl Drop for ClipboardGuard {
 /// the foreground app, the Unicode text is read, and the original IDataObject
 /// is put back and flushed before this function returns.
 pub fn capture_selected_text() -> CaptureResult {
-    let started_at = Instant::now();
-    eprintln!("capture.clipboard.start");
+    capture_text(false)
+}
 
-    let result = capture_inner();
+/// Selects and captures all text in the focused input control. The selection is
+/// deliberately left active so the translated reply can replace it in-place.
+pub fn capture_focused_input() -> CaptureResult {
+    capture_text(true)
+}
+
+fn capture_text(select_all: bool) -> CaptureResult {
+    let started_at = Instant::now();
+    let operation = if select_all { "reply" } else { "read" };
+    eprintln!("capture.clipboard.start mode={operation}");
+
+    let result = capture_inner(select_all);
     match &result {
         Ok(text) => eprintln!(
             "capture.clipboard.success text_length={} elapsed_ms={}",
@@ -89,10 +100,10 @@ pub fn capture_selected_text() -> CaptureResult {
     }
 }
 
-fn capture_inner() -> Result<String, CaptureError> {
+fn capture_inner(select_all: bool) -> Result<String, CaptureError> {
     let _com = ComApartment::initialize().map_err(|_| CaptureError::ClipboardUnavailable)?;
 
-    wait_for_hotkey_release();
+    wait_for_hotkey_release(select_all);
 
     let original = match unsafe { OleGetClipboard() } {
         Ok(data) => Some(data),
@@ -102,7 +113,7 @@ fn capture_inner() -> Result<String, CaptureError> {
     let original_text = read_unicode_text_raw().ok();
 
     let initial_sequence = unsafe { GetClipboardSequenceNumber() };
-    if !send_copy_shortcut() {
+    if !send_copy_shortcut(select_all) {
         restore_clipboard(original.as_ref(), original_text.as_deref())?;
         return Err(CaptureError::InputBlocked);
     }
@@ -120,20 +131,37 @@ fn capture_inner() -> Result<String, CaptureError> {
     captured
 }
 
-fn wait_for_hotkey_release() {
+fn wait_for_hotkey_release(reply_shortcut: bool) {
     let deadline = Instant::now() + Duration::from_millis(500);
-    while (Vk::Alt.is_down() || Vk::Q.is_down()) && Instant::now() < deadline {
+    while (Vk::Alt.is_down()
+        || if reply_shortcut {
+            Vk::Enter.is_down()
+        } else {
+            Vk::Q.is_down()
+        })
+        && Instant::now() < deadline
+    {
         thread::sleep(Duration::from_millis(5));
     }
 }
 
-fn send_copy_shortcut() -> bool {
-    let inputs = [
+fn send_copy_shortcut(select_all: bool) -> bool {
+    let mut inputs = Vec::with_capacity(if select_all { 8 } else { 4 });
+    if select_all {
+        inputs.extend([
+            Input::from_vk(Vk::Control, Action::Press),
+            Input::from_vk(Vk::A, Action::Press),
+            Input::from_vk(Vk::A, Action::Release),
+            Input::from_vk(Vk::Control, Action::Release),
+        ]);
+        thread::sleep(Duration::from_millis(25));
+    }
+    inputs.extend([
         Input::from_vk(Vk::Control, Action::Press),
         Input::from_vk(Vk::C, Action::Press),
         Input::from_vk(Vk::C, Action::Release),
         Input::from_vk(Vk::Control, Action::Release),
-    ];
+    ]);
     winput::send_inputs(&inputs) == inputs.len() as u32
 }
 

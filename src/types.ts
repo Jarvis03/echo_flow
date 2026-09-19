@@ -18,7 +18,10 @@ export interface CaptureResult {
 export interface TranslationStarted {
   originalText: string;
   provider: string;
+  mode: TranslationMode;
 }
+
+export type TranslationMode = "read" | "reply";
 
 export interface TranslationResult {
   success: boolean;
@@ -27,11 +30,13 @@ export interface TranslationResult {
   provider: string;
   errorCode?: "missing_api_key" | "network_error" | "provider_error" | "invalid_response";
   message?: string;
+  mode: TranslationMode;
+  injected: boolean;
 }
 
 export type CaptureState =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "translating"; originalText: string; provider: string }
-  | { status: "success"; originalText: string; translatedText: string; provider: string }
+  | { status: "translating"; originalText: string; provider: string; mode: TranslationMode }
+  | { status: "success"; originalText: string; translatedText: string; provider: string; mode: TranslationMode; injected: boolean }
   | { status: "error"; code?: CaptureErrorCode | TranslationResult["errorCode"]; message: string; originalText?: string };

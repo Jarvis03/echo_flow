@@ -10,6 +10,8 @@ English-to-Chinese translation milestone requested by `echoflow.md`:
 - restore the original clipboard
 - show the result in a small always-on-top window
 - translate captured text to Simplified Chinese with Google Cloud Translation
+- translate the focused Chinese reply to English with `Alt + Enter`
+- replace the focused input field with the English reply without sending it
 
 SQLite, OCR, Learning, text injection, and app-specific adapters remain out of
 scope for this milestone.
@@ -38,6 +40,11 @@ Select text in another application and press `Alt + Q`. LingoDesk waits for
 the hotkey keys to be released, captures the selection, restores the previous
 clipboard data, translates the selection, and opens the floating window near
 the pointer.
+
+To write a reply, type Chinese in the target application's input field and
+press `Alt + Enter`. LingoDesk selects the current field, translates it to
+English, and types the result back into the same field. Review it and press
+`Enter` yourself to send it.
 
 ## Validate
 

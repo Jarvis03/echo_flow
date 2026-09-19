@@ -7,6 +7,7 @@ describe("toCaptureState", () => {
       status: "translating",
       originalText: "Hello",
       provider: "Google Translate",
+      mode: "read",
     });
   });
 
@@ -32,12 +33,36 @@ describe("toCaptureState", () => {
         originalText: "Hello",
         translatedText: "你好",
         provider: "Google Translate",
+        mode: "read",
+        injected: false,
       }),
     ).toEqual({
       status: "success",
       originalText: "Hello",
       translatedText: "你好",
       provider: "Google Translate",
+      mode: "read",
+      injected: false,
+    });
+  });
+
+  it("maps an injected reply translation", () => {
+    expect(
+      toTranslationState({
+        success: true,
+        originalText: "我会检查一下",
+        translatedText: "I'll check it.",
+        provider: "Google Translate",
+        mode: "reply",
+        injected: true,
+      }),
+    ).toEqual({
+      status: "success",
+      originalText: "我会检查一下",
+      translatedText: "I'll check it.",
+      provider: "Google Translate",
+      mode: "reply",
+      injected: true,
     });
   });
 });
