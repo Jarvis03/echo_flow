@@ -38,7 +38,7 @@ impl TranslationProvider for GoogleTranslationProvider {
         let response = self
             .client
             .post(GOOGLE_TRANSLATE_URL)
-            .query(&[("key", self.api_key.as_str())])
+            .header("X-Goog-Api-Key", &self.api_key)
             .json(&TranslateRequest {
                 q: text,
                 target: "zh-CN",
